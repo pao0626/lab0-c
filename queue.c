@@ -164,11 +164,12 @@ void q_swap(struct list_head *head)
     if (!head)
         return;
     struct list_head *node;
-    list_for_each (node, head)
+    list_for_each (node, head) {
         if (node->next == head) {
             return;
         }
-    list_move(node, node->next);
+        list_move(node, node->next);
+    }
     return;
 }
 
@@ -205,23 +206,41 @@ void q_reverseK(struct list_head *head, int k)
     return;
 }
 
+/* merge two queue in ascending/descending order */
+void q_merge_two(struct list_head *first,
+                 struct list_head *second,
+                 bool descend)
+{
+    if (!first || !second) {
+        return;
+    }
+    LIST_HEAD(tmp);
+    while (!list_empty(first) && !list_empty(second)) {
+        element_t *first_elem = list_first_entry(first, element_t, list);
+        element_t *second_elem = list_first_entry(second, element_t, list);
+        if (descend) {
+            if (first_elem->value >= second_elem->value) {
+                list_move_tail(first, &tmp);
+            } else
+                list_move_tail(second, &tmp);
+        } else {
+            if (first_elem->value <= second_elem->value) {
+                list_move_tail(first, &tmp);
+            } else
+                list_move_tail(second, &tmp);
+        }
+    }
+    if (list_empty(second)) {
+        list_splice_tail_init(first, &tmp);
+    }
+    list_splice_init(&tmp, second);
+}
+
 /* Sort elements of queue in ascending/descending order */
 void q_sort(struct list_head *head, bool descend)
 {
     if (!head || list_empty(head) || list_is_singular(head))
         return;
-    if (q_size(head) == 2) {
-        if (descend &&
-            strcmp(list_entry(head->next, element_t, list)->value,
-                   list_entry(head->prev, element_t, list)->value) >= 0)
-            return;
-        if (descend &&
-            strcmp(list_entry(head->next, element_t, list)->value,
-                   list_entry(head->prev, element_t, list)->value) <= 0)
-            return;
-        list_move(head->prev, head);
-        return;
-    }
     struct list_head *slow = head->next;
     struct list_head *fast = head->next->next;
     while (fast != head && fast->next != head) {
