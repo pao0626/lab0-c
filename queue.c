@@ -219,15 +219,15 @@ void q_merge_two(struct list_head *first,
         element_t *first_elem = list_first_entry(first, element_t, list);
         element_t *second_elem = list_first_entry(second, element_t, list);
         if (descend) {
-            if (first_elem->value >= second_elem->value) {
-                list_move_tail(first, &tmp);
+            if (strcmp(first_elem->value, second_elem->value) >= 0) {
+                list_move_tail(first->next, &tmp);
             } else
-                list_move_tail(second, &tmp);
+                list_move_tail(second->next, &tmp);
         } else {
-            if (first_elem->value <= second_elem->value) {
-                list_move_tail(first, &tmp);
+            if (strcmp(first_elem->value, second_elem->value) <= 0) {
+                list_move_tail(first->next, &tmp);
             } else
-                list_move_tail(second, &tmp);
+                list_move_tail(second->next, &tmp);
         }
     }
     if (list_empty(second)) {
@@ -241,18 +241,18 @@ void q_sort(struct list_head *head, bool descend)
 {
     if (!head || list_empty(head) || list_is_singular(head))
         return;
-    struct list_head *slow = head->next;
-    struct list_head *fast = head->next->next;
-    while (fast != head && fast->next != head) {
-        slow = slow->next;
-        fast = fast->next->next;
+    struct list_head *left = head->next;
+    struct list_head *right = head->prev;
+    while (left != right && left->next != right) {
+        left = left->next;
+        right = right->prev;
     }
-    LIST_HEAD(left);
-    // head for right part Linklist, slow == mid
-    list_cut_position(&left, head, slow);
-    q_sort(&left, descend);
+    LIST_HEAD(first);
+    // first for left part of Linklist, left == mid
+    list_cut_position(&first, head, left);
+    q_sort(&first, descend);
     q_sort(head, descend);
-    q_merge_two(&left, head, descend);
+    q_merge_two(&first, head, descend);
 }
 
 /* Remove every node which has a node with a strictly less value anywhere to
