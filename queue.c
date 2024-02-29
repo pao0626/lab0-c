@@ -161,26 +161,101 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
+    if (!head)
+        return;
+    struct list_head *node;
+    list_for_each (node, head)
+        if (node->next == head) {
+            return;
+        }
+    list_move(node, node->next);
+    return;
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    if (!head)
+        return;
+    struct list_head *node, *safe;
+    list_for_each_safe (node, safe, head)
+        list_move(node, head);
+    return;
+}
 
 /* Reverse the nodes of the list k at a time */
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    if (!head)
+        return;
+    int count = 0;
+    struct list_head *node, *safe, *cut = head;
+    LIST_HEAD(tmp_head);
+    list_for_each_safe (node, safe, head) {
+        count++;
+        if (count == k) {
+            list_cut_position(&tmp_head, cut, node);
+            q_reverse(&tmp_head);
+            list_splice_init(&tmp_head, cut);
+            count = 0;
+            cut = safe->prev;
+        }
+    }
+    return;
 }
 
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+    if (q_size(head) == 2) {
+        if (descend &&
+            strcmp(list_entry(head->next, element_t, list)->value,
+                   list_entry(head->prev, element_t, list)->value) >= 0)
+            return;
+        if (descend &&
+            strcmp(list_entry(head->next, element_t, list)->value,
+                   list_entry(head->prev, element_t, list)->value) <= 0)
+            return;
+        list_move(head->prev, head);
+        return;
+    }
+    struct list_head *slow = head->next;
+    struct list_head *fast = head->next->next;
+    while (fast != head && fast->next != head) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    LIST_HEAD(left);
+    // head for right part Linklist, slow == mid
+    list_cut_position(&left, head, slow);
+    q_sort(&left, descend);
+    q_sort(head, descend);
+    q_merge_two(&left, head, descend);
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
 int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (!head || list_empty(head))
+        return 0;
+    element_t *cur = list_last_entry(head, element_t, list);
+    int count = 1;
+    while (cur->list.prev != head) {
+        element_t *prev = list_entry(cur->list.prev, element_t, list);
+        if (strcmp(prev->value, cur->value) <= 0) {
+            count++;
+            cur = prev;
+        } else {
+            list_del(&prev->list);
+            q_release_element(prev);
+        }
+    }
+    return count;
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
@@ -188,7 +263,21 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (!head || list_empty(head))
+        return 0;
+    element_t *cur = list_entry(head->prev, element_t, list);
+    int count = 1;
+    while (cur->list.prev != head) {
+        element_t *prev = list_entry(cur->list.prev, element_t, list);
+        if (strcmp(prev->value, cur->value) >= 0) {
+            count++;
+            cur = prev;
+        } else {
+            list_del(&prev->list);
+            q_release_element(prev);
+        }
+    }
+    return count;
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
