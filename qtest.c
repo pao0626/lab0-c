@@ -578,6 +578,11 @@ static bool do_size(int argc, char *argv[])
 
     return ok && !error_check();
 }
+/**
+ * q_shuffle() - Shuffle every nodes in queue
+ * @head: header of queue
+ */
+extern void q_shuffle(struct list_head *head);
 
 static bool do_shuffle(int argc, char *argv[])
 {
