@@ -108,6 +108,34 @@ int q_size(struct list_head *head)
     return len;
 }
 
+/* Shuffle every nodes in queue */
+void q_shuffle(struct list_head *head)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+    int len = q_size(head);
+    struct list_head *old;
+    struct list_head *new = head->prev;
+    while (len != 1) {
+        int idx = rand() % len;
+        old = head->next;
+        while (idx--) {
+            old = old->next;
+        }
+        swap(list_entry(new, element_t, list),
+             list_entry(old, element_t, list));
+        len--;
+    }
+    return;
+}
+
+void swap_values(element_t *a, element_t *b)
+{
+    char *temp = a->value;
+    a->value = b->value;
+    b->value = temp;
+}
+
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {

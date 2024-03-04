@@ -579,6 +579,37 @@ static bool do_size(int argc, char *argv[])
     return ok && !error_check();
 }
 
+static bool do_shuffle(int argc, char *argv[])
+{
+    if (argc != 1) {
+        report(1, "%s takes too much arguments", argv[0]);
+        return false;
+    }
+
+    if (!current || !current->q) {
+        report(3, "Warning: Calling shuffle on null queue");
+        return false;
+    }
+    error_check();
+
+    int cnt = q_size(current->q);
+    if (!cnt)
+        report(3, "Warning: Calling shuffle on empty queue");
+    else if (cnt < 2)
+        report(3, "Warning: Calling shuffle on single node");
+    error_check();
+
+    set_noallocate_mode(true);
+    if (exception_setup(true))
+        q_shuffle(current->q);
+    exception_cancel();
+
+    set_noallocate_mode(false);
+
+    q_show(3);
+    return !error_check();
+}
+
 bool do_sort(int argc, char *argv[])
 {
     if (argc != 1) {
@@ -1037,6 +1068,7 @@ static void console_init()
     ADD_COMMAND(reverse, "Reverse queue", "");
     ADD_COMMAND(sort, "Sort queue in ascending/descening order", "");
     ADD_COMMAND(size, "Compute queue size n times (default: n == 1)", "[n]");
+    ADD_COMMAND(shuffle, "Shufffle queue", "");
     ADD_COMMAND(show, "Show queue contents", "");
     ADD_COMMAND(dm, "Delete middle node in queue", "");
     ADD_COMMAND(dedup, "Delete all nodes that have duplicate string", "");
