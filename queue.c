@@ -354,18 +354,18 @@ int cmp_function(void *priv,
 {
     element_t *a_entry = list_entry(a, element_t, list);
     element_t *b_entry = list_entry(b, element_t, list);
-    bool ascending = *(bool *) priv;  // 将 void* 参数转换回 bool
-    if (ascending) {
-        return strcmp(a_entry->value, b_entry->value) > 0;
-    } else {
+    bool descend = *(bool *) priv;  // 将 void* 参数转换回 bool
+    if (descend) {
         return strcmp(a_entry->value, b_entry->value) < 0;
+    } else {
+        return strcmp(a_entry->value, b_entry->value) > 0;
     }
 }
 
 /* Sort elements of queue in ascending/descending order */
-void q_linux_sort(struct list_head *head, bool ascending)
+void q_linux_sort(struct list_head *head, bool descend)
 {
-    if (!head || list_empty(head))
+    if (!head || list_empty(head) || list_is_singular(head))
         return;
-    list_sort(&ascending, head, cmp_function);
+    list_sort(&descend, head, cmp_function);
 }
