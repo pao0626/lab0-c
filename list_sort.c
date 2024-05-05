@@ -1,6 +1,8 @@
 // Ref: https://github.com/torvalds/linux/blob/master/lib/list_sort.c
 #include "list_sort.h"
 #include "list.h"
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#define likely(x) __builtin_expect(!!(x), 1)
 
 __attribute__((nonnull(2, 3, 4))) static struct list_head *
 merge(void *priv, list_cmp_func_t cmp, struct list_head *a, struct list_head *b)
