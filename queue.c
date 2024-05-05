@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "list_sort.h"
 #include "queue.h"
 
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
@@ -345,4 +346,26 @@ int q_merge(struct list_head *head, bool descend)
                     descend);
     }
     return ret;
+}
+
+int cmp_function(void *priv,
+                 const struct list_head *a,
+                 const struct list_head *b)
+{
+    element_t *a_entry = list_entry(a, element_t, list);
+    element_t *b_entry = list_entry(b, element_t, list);
+    bool ascending = *(bool *) priv;  // 将 void* 参数转换回 bool
+    if (ascending) {
+        return strcmp(a_entry->value, b_entry->value) > 0;
+    } else {
+        return strcmp(a_entry->value, b_entry->value) < 0;
+    }
+}
+
+/* Sort elements of queue in ascending/descending order */
+void q_linux_sort(struct list_head *head, bool ascending)
+{
+    if (!head || list_empty(head))
+        return;
+    list_sort(&ascending, head, cmp_function);
 }

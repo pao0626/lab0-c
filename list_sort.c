@@ -36,7 +36,7 @@ __attribute__((nonnull(2, 3, 4, 5))) static void merge_final(
     struct list_head *b)
 {
     struct list_head *tail = head;
-    size_t count = 0;
+    unsigned char count = 0;
     for (;;) {
         if (cmp(priv, a, b) <= 0) {
             tail->next = a;
