@@ -1,5 +1,5 @@
 /* Implementation of testing code for queue code */
-
+#define _POSIX_C_SOURCE 199309L
 #include <assert.h>
 #include <errno.h>
 #include <getopt.h>
